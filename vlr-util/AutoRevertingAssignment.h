@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <type_traits>
 
 #include "config.h"
 
@@ -8,7 +9,8 @@
 
 namespace vlr {
 
-template< typename TAssignedVariable, typename TAssignment = TAssignedVariable >
+template <typename TAssignedVariable, 
+	typename TAssignment = TAssignedVariable>
 class CAutoRevertingAssignment
 	: public CBaseWithVirtualDestructor
 {
@@ -20,15 +22,29 @@ public:
 	HRESULT ClearRevertToValue()
 	{
 		m_otRevertToValue = {};
+
 		return S_OK;
 	}
-	HRESULT RevertAssignment()
+	HRESULT RevertAssignment() noexcept
 	{
 		if (!m_otRevertToValue.has_value())
 		{
 			return S_FALSE;
 		}
-		m_tAssignedVariable = m_otRevertToValue.value();
+
+		// Note: We cannot safely throw exceptions from this method, because it's called from the destructor. 
+		// If the assignment operator throws, we will terminate the process. So wrap in try/catch and return 
+		// an error code instead.
+		try
+		{
+			m_tAssignedVariable = std::move(m_otRevertToValue.value());
+			m_otRevertToValue = {};
+		}
+		catch (...)
+		{
+			return E_FAIL;
+		}
+
 		return S_OK;
 	}
 

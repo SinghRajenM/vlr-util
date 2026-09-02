@@ -80,19 +80,12 @@ namespace detail {
 template< typename TResult, typename TFormatString, typename... Arg >
 inline auto formatpf_to_TResult(TFormatString svFormatString, Arg&&... args)
 {
-	try
-	{
-#pragma warning(suppress: 4996) // fmt::sprintf is deprecated
-		auto sResult = fmt::sprintf(svFormatString, std::forward<Arg>(args)...);
-		return ConvertTo<TResult>(sResult);
-	}
-	catch (const fmt::format_error& /*oError*/)
-	{
-		throw;
-	}
+	// Note: fmt::sprintf can throw exceptions, so we don't want to use noexcept here. Previously we caught and 
+	// re-threw exceptions, but that is a NOOP; just let the inner call throw.
 
-	// If we didn't throw out of the catch, return an empty result value
-	return TResult{};
+#pragma warning(suppress: 4996) // fmt::sprintf is deprecated
+	auto sResult = fmt::sprintf(svFormatString, std::forward<Arg>(args)...);
+	return ConvertTo<TResult>(sResult);
 }
 
 //template< typename TResult, typename TFormatString >
