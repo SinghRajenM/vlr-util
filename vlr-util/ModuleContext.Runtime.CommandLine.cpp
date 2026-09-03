@@ -60,7 +60,7 @@ HRESULT CCommandLine::SetFromAPI_Win32()
 	else
 	{
 		auto ppArgArray_UTF16 = ::CommandLineToArgvW( pcszCommandLine, &m_nArgCount );
-		m_spAutoFreeArgArray = std::make_shared<vlr::CActionOnDestruction<void>>( vlr::MakeAutoCleanup_viaLocalFree( ppArgArray_UTF16 ) );
+		m_spAutoFreeArgArray = std::make_shared<vlr::CActionOnDestruction<void>>( [=] { LocalFree( ppArgArray_UTF16 ); } );
 		m_ppArgArray_UTF16 = ppArgArray_UTF16;
 	}
 
