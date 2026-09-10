@@ -374,8 +374,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
-    <None Include="vcpkg.json" />
-    <None Include="..\vcpkg-configuration.json" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

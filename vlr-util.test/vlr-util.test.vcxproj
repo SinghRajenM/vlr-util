@@ -331,6 +331,7 @@
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\vcpkg-configuration.json" />
     <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>

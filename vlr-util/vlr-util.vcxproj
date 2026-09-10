@@ -156,8 +156,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
-    <None Include="..\vcpkg-configuration.json" />
-    <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
@@ -268,9 +266,6 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)Build\Bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)Build\Intermediate\$(ProjectName)\$(Configuration)\$(Platform)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Label="Vcpkg">
-    <VcpkgEnableManifest>true</VcpkgEnableManifest>
   </PropertyGroup>
   <!-- Note: Added to support custom properties for features -->
   <PropertyGroup>

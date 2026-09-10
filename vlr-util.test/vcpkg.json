@@ -2,9 +2,6 @@
   "name": "vlr-util-test",
   "version-string": "0.1",
   "dependencies": [
-    {
-      "name": "fmt"
-    },
     "gtest",
     "catch2"
   ]

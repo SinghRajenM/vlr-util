@@ -54,7 +54,7 @@ public:
 		{
 			return _T("[unknown]");
 		}
-		return fmt::format(_T("{}:{}"), GetFileNameOnly().asStringView(), m_nLineNumber);
+		return std::format(_T("{}:{}"), GetFileNameOnly().asStringView(), m_nLineNumber);
 	}
 
 	static constexpr CCodeContext FunctionOnly()

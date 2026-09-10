@@ -56,7 +56,7 @@ inline constexpr auto range_checked_cast_choice(TSource nValue, choice<1>&&)
 	{
 		// Note: The is intentionally not a static_assert here, because this is a runtime check. 
 		// The static_assert is in the other function, which should have been called if the source was smaller or equal to the dest.
-		auto sAssertionFailureMessage = fmt::format("Out of range cast detected, dest type '{}', value '{}'",
+		auto sAssertionFailureMessage = std::format("Out of range cast detected, dest type '{}', value '{}'",
 			typeid(TDest).name(), nValue);
 		HandleOutOfRangeAssertionFailure(sAssertionFailureMessage);
 

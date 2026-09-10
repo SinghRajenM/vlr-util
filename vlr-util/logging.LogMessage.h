@@ -154,7 +154,7 @@ constexpr auto LogMessageFmt_WithFmtString(
 			return VLR_LOGGING_FORMATTED_MESSAGE_RESULT_EMPTY;
 		}
 
-		auto sMessage = fmt::format(svFormatString, std::forward<Arg>(args)...);
+		auto sMessage = std::format(svFormatString, std::forward<Arg>(args)...);
 
 		/*sr =*/ oCallbacks.m_fLogMessage(oMessageContext, util::Convert::ToStdString(sMessage));
 
@@ -171,7 +171,7 @@ constexpr auto LogMessageFmt_WithFmtString(
 template <typename... Arg>
 constexpr auto LogMessageFmt(
 	const CMessageContext& oMessageContext,
-	fmt::format_string<Arg...> svFormatString,
+	std::format_string<Arg...> svFormatString,
 	Arg&&... args) VLR_LogMossageExceptionSpec
 {
 	return detail::LogMessageFmt_WithFmtString(
@@ -183,7 +183,7 @@ constexpr auto LogMessageFmt(
 template <typename... Arg>
 constexpr auto LogMessageFmt(
 	const CMessageContext& oMessageContext,
-	fmt::wformat_string<Arg...> svFormatString,
+	std::wformat_string<Arg...> svFormatString,
 	Arg&&... args) VLR_LogMossageExceptionSpec
 {
 	return detail::LogMessageFmt_WithFmtString(

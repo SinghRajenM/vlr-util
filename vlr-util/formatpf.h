@@ -3,6 +3,8 @@
 #include "config.h"
 
 #include "include.fmt.h"
+#include <cstdio>
+#include <cwchar>
 #include "util.choice.h"
 #include "util.convert.StringConversion.h"
 #include "util.std_aliases.h"
@@ -77,33 +79,69 @@ constexpr auto ConvertTo(const TSource& tSource)
 
 namespace detail {
 
-template< typename TResult, typename TFormatString, typename... Arg >
-inline auto formatpf_to_TResult(TFormatString svFormatString, Arg&&... args)
-{
-	// Note: fmt::sprintf can throw exceptions, so we don't want to use noexcept here. Previously we caught and 
-	// re-threw exceptions, but that is a NOOP; just let the inner call throw.
+// Note: Arguments to a C variadic (printf-style) call have to be trivially-copyable POD types, so
+// string class types must be reduced to a raw pointer first. The fmt library used to do this for us
+// via its typed argument store; this replaces that behaviour for the CRT-based implementation.
+// Note: The result aliases the passed argument, so it is only valid for the duration of the full
+// expression in which it is called (which is all we need for the formatting call below).
 
-#pragma warning(suppress: 4996) // fmt::sprintf is deprecated
-	auto sResult = fmt::sprintf(svFormatString, std::forward<Arg>(args)...);
+template< typename TChar, typename TArg >
+constexpr decltype(auto) AsPrintfArg(const TArg& tArg)
+{
+	if constexpr (std::is_convertible_v<const TArg&, const TChar*>)
+	{
+		return static_cast<const TChar*>(tArg);
+	}
+	else if constexpr (requires { static_cast<const TChar*>(tArg.c_str()); })
+	{
+		return static_cast<const TChar*>(tArg.c_str());
+	}
+	else
+	{
+		return (tArg);
+	}
+}
+
+template< typename TResult, typename... Arg >
+inline auto formatpf_to_TResult(lib_fmt::FormatStringA svFormatString, const Arg&... args)
+{
+	// Note: A string_view is not necessarily null-terminated, and the CRT formatting functions
+	// require a null-terminated format string.
+	const auto saFormatString = std::string{ svFormatString };
+
+	// Note: snprintf returns the number of characters which would have been written (excluding the
+	// null terminator), or a negative value on error.
+	const auto nRequired = std::snprintf(nullptr, 0, saFormatString.c_str(), AsPrintfArg<char>(args)...);
+	if (nRequired <= 0)
+	{
+		return ConvertTo<TResult>(std::string{});
+	}
+
+	auto sResult = std::string(static_cast<size_t>(nRequired), '\0');
+	std::snprintf(sResult.data(), static_cast<size_t>(nRequired) + 1, saFormatString.c_str(), AsPrintfArg<char>(args)...);
+
 	return ConvertTo<TResult>(sResult);
 }
 
-//template< typename TResult, typename TFormatString >
-//inline auto vformatpf_to_TResult(TFormatString svFormatString, const fmt::format_args_t<fmt::printf_context>& oArgs)
-//{
-//	try
-//	{
-//		auto sResult = fmt::vsprintf(svFormatString, oArgs);
-//		return ConvertTo<TResult>(sResult);
-//	}
-//	catch (const fmt::format_error& /*oError*/)
-//	{
-//		throw;
-//	}
-//
-//	// If we didn't throw out of the catch, return an empty result value
-//	return TResult{};
-//}
+template< typename TResult, typename... Arg >
+inline auto formatpf_to_TResult(lib_fmt::FormatStringW svFormatString, const Arg&... args)
+{
+	const auto swFormatString = std::wstring{ svFormatString };
+
+	// Note: There is no wide equivalent of the snprintf "measure into a null buffer" call; _scwprintf
+	// returns the number of characters which would be written (excluding the null terminator).
+	const auto nRequired = _scwprintf(swFormatString.c_str(), AsPrintfArg<wchar_t>(args)...);
+	if (nRequired <= 0)
+	{
+		return ConvertTo<TResult>(std::wstring{});
+	}
+
+	auto sResult = std::wstring(static_cast<size_t>(nRequired), L'\0');
+	_snwprintf_s(sResult.data(), static_cast<size_t>(nRequired) + 1, static_cast<size_t>(nRequired),
+		swFormatString.c_str(), AsPrintfArg<wchar_t>(args)...);
+
+	return ConvertTo<TResult>(sResult);
+}
 
 } // namespace detail
 
@@ -111,26 +149,26 @@ template< typename TResult, typename... Arg >
 inline auto formatpf_to(lib_fmt::FormatStringA svFormatString, Arg&&... args)
 -> TResult
 {
-	return detail::formatpf_to_TResult<TResult, lib_fmt::FormatStringA>(svFormatString, std::forward<Arg>(args)...);
+	return detail::formatpf_to_TResult<TResult>(svFormatString, std::forward<Arg>(args)...);
 }
 
 template< typename TResult, typename... Arg >
 inline auto formatpf_to(lib_fmt::FormatStringW svFormatString, Arg&&... args)
 -> TResult
 {
-	return detail::formatpf_to_TResult<TResult, lib_fmt::FormatStringW>(svFormatString, std::forward<Arg>(args)...);
+	return detail::formatpf_to_TResult<TResult>(svFormatString, std::forward<Arg>(args)...);
 }
 
 template< typename... Arg >
 inline auto formatpf(lib_fmt::FormatStringA svFormatString, Arg&&... args)
 {
-	return detail::formatpf_to_TResult<vlr::string, lib_fmt::FormatStringA>(svFormatString, std::forward<Arg>(args)...);
+	return detail::formatpf_to_TResult<vlr::string>(svFormatString, std::forward<Arg>(args)...);
 }
 
 template< typename... Arg >
 inline auto formatpf(lib_fmt::FormatStringW svFormatString, Arg&&... args)
 {
-	return detail::formatpf_to_TResult<vlr::tstring, lib_fmt::FormatStringW>(svFormatString, std::forward<Arg>(args)...);
+	return detail::formatpf_to_TResult<vlr::tstring>(svFormatString, std::forward<Arg>(args)...);
 }
 
 } // namespace vlr

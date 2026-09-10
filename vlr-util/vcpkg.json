@@ -1,9 +1,0 @@
-{
-  "name": "vlr-util",
-  "version-string": "0.1",
-  "dependencies": [
-    {
-      "name": "fmt"
-    }
-  ]
-}

@@ -2,14 +2,11 @@
 
 #include "config.h"
 
-//#define FMT_HEADER_ONLY
+#include <format>
 
-//#include <fmt/format.h>
-// Note: This file is required to support the UTF-16 char set in formatting
-#include <fmt/xchar.h>
-#include <fmt/printf.h>
+#include "zstring_view.h"
 
-// Note: Some using aliases to allow us to specify the types which the fmt library expects 
+// Note: Some using aliases to allow us to specify the types which the std::format library expects 
 // for various method calls.
 
 namespace lib_fmt {
@@ -20,44 +17,61 @@ using FormatStringT = std::basic_string_view<TCHAR>;
 
 } // namespace lib_fmt
 
-#if VLR_CONFIG_INCLUDE_ATL_CString
-
 // Note: If you have "custom" types which you want to pass as format parameters, you need to 
 // create template specializations which tell the library how to parse and format them.
+// As of time of writing: https://en.cppreference.com/w/cpp/utility/format/formatter
+
+// Note: The zstring_view types derive from std::basic_string_view rather than being it, and the 
+// standard formatter specializations only match the exact type, so they need their own. (The fmt 
+// library used to pick these up implicitly.) Both types are formatted via the underlying view.
+
+template< typename TChar, typename TTraits >
+struct std::formatter<vlr::basic_zstring_view<TChar, TTraits>, TChar>
+	: std::formatter<std::basic_string_view<TChar, TTraits>, TChar>
+{
+	template< typename FormatContext >
+	auto format( const vlr::basic_zstring_view<TChar, TTraits>& svzParam, FormatContext& ctx ) const
+	{
+		return std::formatter<std::basic_string_view<TChar, TTraits>, TChar>::format( svzParam.asStringView(), ctx );
+	}
+};
+
+template< typename TChar, typename TTraits >
+struct std::formatter<vlr::basic_zstring_view_param<TChar, TTraits>, TChar>
+	: std::formatter<std::basic_string_view<TChar, TTraits>, TChar>
+{
+	template< typename FormatContext >
+	auto format( const vlr::basic_zstring_view_param<TChar, TTraits>& svzParam, FormatContext& ctx ) const
+	{
+		return std::formatter<std::basic_string_view<TChar, TTraits>, TChar>::format( svzParam.asStringView(), ctx );
+	}
+};
+
+#if VLR_CONFIG_INCLUDE_ATL_CString
+
 // This code essentially just converts CString to string_view, which is supported directly.
-// As of time of writing: https://fmt.dev/latest/api.html#formatting-user-defined-types
 
 #include <atlstr.h>
 
-#include "zstring_view.h"
-
 template<>
-struct fmt::formatter<CStringA>
-	: fmt::formatter<std::string_view>
+struct std::formatter<CStringA> : std::formatter<std::string_view>
 {
-	//constexpr auto parse( format_parse_context& ctx )
-	//{
-	//	return ctx.begin();
-	//}
-	template< typename ParseContext >
-	auto format( const CStringA& sParam, ParseContext& ctx )
+	template< typename FormatContext >
+	auto format( const CStringA& sParam, FormatContext& ctx ) const
 	{
-		return fmt::formatter<std::string_view>::format_to( ctx.begin(), "{}", vlr::zstring_view{ sParam } );
+		return std::formatter<std::string_view>::format(
+			std::string_view{ sParam.GetString(), static_cast<size_t>(sParam.GetLength()) }, ctx );
 	}
 };
 
 template<>
-struct fmt::formatter<CStringW>
-	: fmt::formatter<std::wstring_view>
+struct std::formatter<CStringW> : std::formatter<std::wstring_view>
 {
-	//constexpr auto parse( format_parse_context& ctx )
-	//{
-	//	return ctx.begin();
-	//}
-	template< typename ParseContext >
-	auto format( const CStringW& sParam, ParseContext& ctx )
+	template< typename FormatContext >
+	auto format( const CStringW& sParam, FormatContext& ctx ) const
 	{
-		return fmt::formatter<std::wstring_view>::format_to( ctx.begin(), "{}", vlr::wzstring_view{ sParam } );
+		return std::formatter<std::wstring_view>::format(
+			std::wstring_view{ sParam.GetString(), static_cast<size_t>(sParam.GetLength()) }, ctx );
 	}
 };
 

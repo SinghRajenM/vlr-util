@@ -5,8 +5,6 @@ project(vlr-util-cmake)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(fmt CONFIG REQUIRED)
-
 set(PROJECT_NAME vlr-util)
 
 ################################################################################
@@ -63,7 +61,6 @@ add_library(${PROJECT_NAME} STATIC
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
-	fmt::fmt
 )
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE
@@ -169,7 +166,6 @@ install(EXPORT vlr-util-targets
 # Generate the config file in the current binary dir (this ensures it's not placed directly in source)
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/vlr-util-config.cmake"
 "include(CMakeFindDependencyMacro)\n"
-"find_package(fmt CONFIG REQUIRED)\n"
 "include(\"\${CMAKE_CURRENT_LIST_DIR}/vlr-util-targets.cmake\")\n"
 )
 

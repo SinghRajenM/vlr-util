@@ -93,7 +93,7 @@ SResult CAppOptionSource_File_Basic::ParseFileLine(
 	}
 
 	// Unknown line... ignoring
-	fmt::print(_T("Ignoring presumed invalid line:\n\t{}\n"), sLine);
+	std::wcout << std::format(_T("Ignoring presumed invalid line:\n\t{}\n"), sLine);
 
 	return SResult::Success_NoWorkDone;
 }
@@ -103,7 +103,7 @@ SResult CAppOptionSource_File_Basic::ParseFileLine_NameValueLine(
 	const tstring& sLine,
 	const tsmatch& oRegexMatch_NameValueLine)
 {
-	fmt::print(_T("Parsed line as name/value:\n\t{}\n"), sLine);
+	std::wcout << std::format(_T("Parsed line as name/value:\n\t{}\n"), sLine);
 
 	// Note: There are a couple valid cases to consider here:
 	// - blank value
@@ -165,7 +165,7 @@ SResult CAppOptionSource_File_Basic::AddSpecifiedOptionValueFromFile(
 	vlr::tstring_view svName,
 	vlr::tstring_view svValue)
 {
-	fmt::print(_T("Adding option name/value from file:\n\t{}: {}\n"), svName, svValue);
+	std::wcout << std::format(_T("Adding option name/value from file:\n\t{}: {}\n"), svName, svValue);
 
 	auto spSpecifiedValue = std::make_shared<CAppOptionSpecifiedValue>(
 		CAppOptionSourceInfo{ AppOptionSource::BinaryRelatedConfigFile, oSourceContext.m_sFilePath },

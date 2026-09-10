@@ -230,7 +230,7 @@ public:
 		{
 			return *pDirectValue;
 		}
-		throw std::logic_error(fmt::format("Cached value for option '{}' is not the requested type", util::Convert::ToStdStringA(m_sNormalizedOptionName)));
+		throw std::logic_error(std::format("Cached value for option '{}' is not the requested type", util::Convert::ToStdStringA(m_sNormalizedOptionName)));
 	}
 
 public:

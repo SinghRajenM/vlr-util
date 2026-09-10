@@ -143,7 +143,7 @@ struct StructName \
 { \
 public: \
 	static constexpr decltype(auto) GetDefaultValue() { return (DefaultValue); } \
-	static auto GetOptionName() { return fmt::format(_T("{}::{}"), GetNamespacePath(), _T(#StructName)); } \
+	static auto GetOptionName() { return std::format(_T("{}::{}"), GetNamespacePath(), _T(#StructName)); } \
 \
 	/*template <typename TDefaultValue, typename std::enable_if_t<std::is_convertible_v<TDefaultValue, ValueType>>* = nullptr>*/ \
 	StructName() \
@@ -162,7 +162,7 @@ struct StructName \
 { \
 public: \
 	static constexpr decltype(auto) GetDefaultValue() { return (DefaultValue); } \
-	static auto GetOptionName() { return fmt::format(_T("{}::{}"), GetNamespacePath(), _T(#StructName)); } \
+	static auto GetOptionName() { return std::format(_T("{}::{}"), GetNamespacePath(), _T(#StructName)); } \
 	static constexpr vlr::tzstring_view GetMetadata() { return (sMetadata); } \
 \
 	/*template <typename TDefaultValue, typename std::enable_if_t<std::is_convertible_v<TDefaultValue, ValueType>>* = nullptr>*/ \

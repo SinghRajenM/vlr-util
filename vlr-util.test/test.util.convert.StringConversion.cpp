@@ -1,5 +1,7 @@
 #include "pch.h"
 
+#include <iostream>
+
 #include <vlr-util/include.fmt.h>
 
 #include <vlr-util/util.convert.StringConversion.h>
@@ -85,8 +87,8 @@ TEST(StringConversion, ToFmtArg_StringA_Nullptr_And_Pointer)
 	auto s4 = ToFmtArg_StringA(pStr);
 	EXPECT_STREQ(std::string{ s4 }.c_str(), "abc");
 
-	// Also verify usage in fmt::format does not crash
-	auto sFormatted = fmt::format("[{}]", ToFmtArg_StringA(psaNull));
+	// Also verify usage in std::format does not crash
+	auto sFormatted = std::format("[{}]", ToFmtArg_StringA(psaNull));
 	EXPECT_EQ(sFormatted, "[]");
 }
 
@@ -111,7 +113,7 @@ TEST(StringConversion, ToFmtArg_StringW_Nullptr_And_Pointer)
 	auto s4 = ToFmtArg_StringW(pStr);
 	EXPECT_STREQ(std::wstring{ s4 }.c_str(), L"abc");
 
-	auto sFormatted = fmt::format(L"[{}]", ToFmtArg_StringW(pswNull));
+	auto sFormatted = std::format(L"[{}]", ToFmtArg_StringW(pswNull));
 	EXPECT_EQ(sFormatted, L"[]");
 }
 
@@ -372,7 +374,7 @@ struct StringConversionUnicode
 		auto pBuffer = reinterpret_cast<const BYTE*>(saValue.data());
 		for (size_t nIndex = 0; nIndex < saValue.length(); ++nIndex)
 		{
-			saByteDisplay += fmt::format("{:02X} ", pBuffer[nIndex]);
+			saByteDisplay += std::format("{:02X} ", pBuffer[nIndex]);
 		}
 
 		return saByteDisplay;
@@ -386,7 +388,7 @@ struct StringConversionUnicode
 		auto pBuffer = reinterpret_cast<const BYTE*>(swValue.data());
 		for (size_t nIndex = 0; nIndex < swValue.length(); ++nIndex)
 		{
-			saByteDisplay += fmt::format("{:02X} ", pBuffer[nIndex]);
+			saByteDisplay += std::format("{:02X} ", pBuffer[nIndex]);
 		}
 
 		return saByteDisplay;
@@ -394,33 +396,33 @@ struct StringConversionUnicode
 
 	void TestRoundTrip_FromUTF8(const std::string& saValue)
 	{
-		fmt::print("Test value (UTF-8): {}\n", saValue);
+		std::cout << std::format("Test value (UTF-8): {}\n", saValue);
 		//std::cout << "Test value (UTF-8): " << saValue << std::endl;
-		fmt::print("Bytes: {}\n", GetByteDisplay(saValue));
+		std::cout << std::format("Bytes: {}\n", GetByteDisplay(saValue));
 
 		auto swValue = vlr::util::Convert::ToStdStringW(saValue);
-		fmt::print(L"Test value (UTF-16): {}\n", swValue);
-		fmt::print("Bytes: {}\n", GetByteDisplay(swValue));
+		std::wcout << std::format(L"Test value (UTF-16): {}\n", swValue);
+		std::cout << std::format("Bytes: {}\n", GetByteDisplay(swValue));
 
 		auto saValue_Copy = vlr::util::Convert::ToStdStringA(swValue);
-		fmt::print("Test value (UTF-8, copy): {}\n", saValue_Copy);
-		fmt::print("Bytes: {}\n", GetByteDisplay(saValue_Copy));
+		std::cout << std::format("Test value (UTF-8, copy): {}\n", saValue_Copy);
+		std::cout << std::format("Bytes: {}\n", GetByteDisplay(saValue_Copy));
 
 		EXPECT_EQ(saValue, saValue_Copy);
 	}
 
 	void TestRoundTrip_FromUTF16(const std::wstring& swValue)
 	{
-		fmt::print(L"Test value (UTF-16): {}\n", swValue);
-		fmt::print("Bytes: {}\n", GetByteDisplay(swValue));
+		std::wcout << std::format(L"Test value (UTF-16): {}\n", swValue);
+		std::cout << std::format("Bytes: {}\n", GetByteDisplay(swValue));
 
 		auto saValue_Copy = vlr::util::Convert::ToStdStringA(swValue);
-		fmt::print("Test value (UTF-8, copy): {}\n", saValue_Copy);
-		fmt::print("Bytes: {}\n", GetByteDisplay(saValue_Copy));
+		std::cout << std::format("Test value (UTF-8, copy): {}\n", saValue_Copy);
+		std::cout << std::format("Bytes: {}\n", GetByteDisplay(saValue_Copy));
 
 		auto swValue_Copy = vlr::util::Convert::ToStdStringW(saValue_Copy);
-		fmt::print(L"Test value (UTF-16, copy): {}\n", swValue_Copy);
-		fmt::print("Bytes: {}\n", GetByteDisplay(saValue_Copy));
+		std::wcout << std::format(L"Test value (UTF-16, copy): {}\n", swValue_Copy);
+		std::cout << std::format("Bytes: {}\n", GetByteDisplay(saValue_Copy));
 
 		EXPECT_EQ(swValue, swValue_Copy);
 	}
